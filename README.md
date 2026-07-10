@@ -175,94 +175,107 @@ bash ./scripts/vtamR.sh
 ```
 
 
-
 ## Compare VTAM and vtamR output
 
-### merge, demultiplex
+### Merge and demultiplex
 
-~~~
-Rscript scripts/compare_read_counts.R
-~~~
+`compare_read_counts.R`
 
-Output:  **comparaison_results/read_count_merge_demultiplex.csv**
+Output:
 
-VTAM and vtamR merge/merge_and_trim and sortreads/demultiplex_and_trim produce files with the same number of sequences. Only one exception with only one read difference:
+**output_info/read_count_merge_demultiplex.csv**
+
+The `merge`/`merge_and_trim` and `sortreads`/`demultiplex_and_trim` steps from VTAM and vtamR produce files with the same number of sequences. The only exception is a single read difference:
 
 | filename        | read_count_vtam | read_count_vtamr | dataset   | step             |
 | --------------- | --------------- | ---------------- | --------- | ---------------- |
 | 14Cro13-1.fasta | 41538           | 41539            | fish_mfzr | demultiplex_trim |
 
-### filter
+### Filter
 
-**Make tables for each VTAM filter from db.sqlite**
+**Export VTAM filter tables from `db.sqlite`**
 
-~~~
-mkdir -p comparaison_results/db_tables
+Create tables for each VTAM filtering step:
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM Sample;" > comparaison_results/db_tables/samples.csv
+```bash
+mkdir -p output_info/db_tables
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM Marker;" > comparaison_results/db_tables/markers.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM Sample;" > output_info/db_tables/samples.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM Run;" > comparaison_results/db_tables/runs.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM Run;" > output_info/db_tables/runs.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM VariantReadCount;" > comparaison_results/db_tables/VariantReadCount.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM VariantReadCount;" > output_info/db_tables/VariantReadCount.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterLFN;" > comparaison_results/db_tables/FilterLFN.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterLFN;" > output_info/db_tables/FilterLFN.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterMinReplicateNumber;" > comparaison_results/db_tables/FilterMinReplicateNumber.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterMinReplicateNumber;" > output_info/db_tables/FilterMinReplicateNumber.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterPCRerror;" > comparaison_results/db_tables/FilterPCRerror.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterPCRerror;" > output_info/db_tables/FilterPCRerror.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterChimera;" > comparaison_results/db_tables/FilterChimera.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterChimera;" > output_info/db_tables/FilterChimera.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterMinReplicateNumber2;" > comparaison_results/db_tables/FilterMinReplicateNumber2.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterMinReplicateNumber2;" > output_info/db_tables/FilterMinReplicateNumber2.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterRenkonen;" > comparaison_results/db_tables/FilterRenkonen.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterRenkonen;" > output_info/db_tables/FilterRenkonen.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterMinReplicateNumber3;" > comparaison_results/db_tables/FilterMinReplicateNumber3.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterMinReplicateNumber3;" > output_info/db_tables/FilterMinReplicateNumber3.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterIndel;" > comparaison_results/db_tables/FilterIndel.csv
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterIndel;" > output_info/db_tables/FilterIndel.csv
 
-sqlite3 -header -csv pipeline_output_1/db.sqlite "SELECT * FROM FilterCodonStop;" > comparaison_results/db_tables/FilterCodonStop.csv
-~~~
+sqlite3 -header -csv db.sqlite "SELECT * FROM FilterCodonStop;" > output_info/db_tables/FilterCodonStop.csv
+```
 
-**compare_filter.R**
+`compare_filter.R`
 
-Compares the final output files produced by VTAM and vtamR and identifies occurrences that are present in one output but absent from the other.
+This script compares the final output files produced by VTAM and vtamR and identifies occurrences that are present in one output but absent from the other.
 
-For these occurrences, the script generates files reporting their presence or absence at each filtering step of the pipeline in which they occur:
+For each occurrence, the script generates files reporting its presence or absence at each filtering step in which it appears:
 
-- occurrences_missing_in_vtam_DATASET.csv
-- occurrences_missing_in_vtamR_DATASET.csv
+* `occurrences_missing_in_vtam_DATASET.csv`
+* `occurrences_missing_in_vtamR_DATASET.csv`
 
-It also generates a file containing the read counts from both pipelines for each occurrence detected in the final filtered outputs:
+It also generates a file containing read counts from both pipelines for each occurrence detected in the final filtered outputs:
 
-- read_count_VTAM_vtamR_DATASET.csv
+* `read_count_VTAM_vtamR_DATASET.csv`
 
-~~~
-Rscript scripts/compare_filter.R
-~~~
 
-**Conclusions**
+### Conclusions
 
-There are only a small number of occurrences that differ between the two pipelines. All discrepancies originate from the *filter_chimera* or *filter_pcr_error* steps.
+Only a small number of occurrences differ between the two pipelines. All discrepancies originate from the `filter_chimera` or `filter_pcr_error` steps.
 
 For PCR error and chimera filtering, vtamR removes a variant when it is classified as a PCR error in more than 80% of the samples in which it occurs. In contrast, VTAM processes samples independently and makes filtering decisions on a sample-by-sample basis, without enforcing a consistent decision for a given ASV across all samples.
 
-As a result, when analyses are performed independently for each sample, obtaining exactly identical results between the two pipelines is not possible. However, we believe that the behavior implemented in vtamR is more biologically justified, since a given ASV is unlikely to represent an artefact in one sample while being a true biological variant in another.
+Therefore, when analyses are performed independently for each sample, obtaining exactly identical results between the two pipelines is not possible. However, the behavior implemented in vtamR is considered more biologically justified, since a given ASV is unlikely to represent an artefact in one sample while corresponding to a true biological variant in another.
 
 ### Taxassign
 
-**comparaison compare_taxassig.R**
+`compare_taxassign.R`
 
-Number of assignment sligthly different between vtam and vtamR. Almost all assignements are at <=80% identity, which are doubious anyway.
+The proportion of different assignments between VTAM and vtamR is low (2–3%). Almost all assignments that differ between the pipelines occur at ≤80% identity, and are therefore uncertain in any case.
 
-Bat: 41/1676
+| dataset   | total_asv | different | prop               |
+| --------- | --------- | --------- | ------------------ |
+| fish_mfzr | 153       | 5         | 0.0326797385620915 |
+| fish_zfzr | 105       | 2         | 0.019047619047619  |
+| bat       | 1676      | 41        | 0.0244630071599045 |
 
-fish_mfzr : 5/153
+### Pool markers
 
-fish_zfzr : 2/105
+`compare_pool_markers.R`
 
-### pool markers
+The VTAM `pool` function and the vtamR `pool_markers` function produce identical results.
 
-Results are identical
+### Runtime
+
+`compare_runtime.R`
+
+For almost all steps and datasets, vtamR is faster than VTAM, both in terms of elapsed time and total CPU time.
+
+Overall, the complete pipeline requires:
+
+* **4484.65 seconds** for vtamR
+* **6510.25 seconds** for VTAM
+
+Thus, vtamR reduces the overall runtime by approximately **30%**.
+
+I corrected grammar, terminology consistency (`pipeline`, `assignments`, `function` names), and formatting while preserving the RM/Markdown structure and command blocks.
