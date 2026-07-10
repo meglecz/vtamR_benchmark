@@ -1,0 +1,4 @@
+lfn_sample_replicate_cutoff: 0.003
+pcr_error_var_prop: 0.1
+lfn_variant_replicate_cutoff: 0.006
+lfn_read_count_cutoff: 10

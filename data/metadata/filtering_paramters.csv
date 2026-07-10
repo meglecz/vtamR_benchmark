@@ -1,0 +1,5 @@
+"dataset","pcr_error_var_prop","lfn_sample_replicate_cutoff","lfn_read_count_cutoff","lfn_variant_cutoff","by_replicate","coding"
+"bat","0.2","0.002",60,"0.006","FALSE","TRUE"
+"fish_mfzr","0.1","0.003",10,"0.006","TRUE","TRUE"
+"fish_zfzr","0.1","0.003",10,"0.006","TRUE","TRUE"
+"shark","0.2","0.001",40,"0.016","TRUE","FALSE"

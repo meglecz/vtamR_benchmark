@@ -1,0 +1,4 @@
+pcr_error_var_prop: 0.20
+lfn_sample_replicate_cutoff: 0.001
+skip_filter_codon_stop: 1
+skip_filter_indel: 1

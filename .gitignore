@@ -1,0 +1,9 @@
+.Rhistory
+backup*
+bat*
+data/fastq*
+shark*
+fish*
+.Rproj.user
+pipeline*
+comparaison_results/db_tables*
