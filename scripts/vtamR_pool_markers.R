@@ -1,3 +1,7 @@
+args <- commandArgs(trailingOnly = TRUE)
+vsearch_path <- as.character(args[1])
+outdir_pipe <- as.character(args[2])
+
 library(vtamR)
 library(dplyr)
 library(tidyr)

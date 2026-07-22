@@ -10,7 +10,7 @@ taxonomy="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5/COInr_for_vtam_taxo
 
 datasets=("bat" "fish_mfzr" "fish_zfzr" "shark")
 
-for i in {1..10}; do
+for i in {9..10}; do
     echo "Iteration $i"
 
     outdir="pipeline_output_$i"
@@ -65,7 +65,7 @@ for i in {1..10}; do
     # STEP filter_default - lfn_variant_replicate for fish and shark - skip FilterIndel, FilterCodonStop for shark
     #################################################
     
-      #  mkdir -p ${ds}/VTAM/filter_default
+        mkdir -p ${ds}/VTAM/filter_default
         if [[ "$ds" == "bat" ]]; then
 
             /usr/bin/time -f \
@@ -114,7 +114,7 @@ for i in {1..10}; do
     # STEP make_known_occurrences
     #################################################
     
- #        mkdir -p ${ds}/VTAM/optimize_suggest
+         mkdir -p ${ds}/VTAM/optimize_suggest
     
         /usr/bin/time -f \
         "VTAM, $i, make_known_occurrences, ${ds}, %E, %U, %S" \

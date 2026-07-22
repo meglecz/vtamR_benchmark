@@ -45,11 +45,12 @@ vtam <- vtam %>%
   filter(!step %in% suggest_steps) %>%
   rbind(optimise)
 
-compare <- full_join(vtam, vtamr, by=c("step", "dataset"), suffix= c("_vtam", "_vtamR"))
+compare <- full_join(vtam, vtamr, by=c("run", "step", "dataset"), suffix= c("_vtam", "_vtamR"))
 
 compare <- compare %>%
   mutate(prop_elapsed = elapsed_vtamR/elapsed_vtam) %>%
-  mutate(prop_total_cpu = total_cpu_vtamR / total_cpu_vtam)
+  mutate(prop_total_cpu = total_cpu_vtamR / total_cpu_vtam) %>%
+  select(-pipeline_vtam, -pipeline_vtamR)
 
 sum(compare$elapsed_vtamR)
 sum(compare$elapsed_vtam)
@@ -58,4 +59,18 @@ sum(compare$elapsed_vtam) / sum(compare$elapsed_vtamR)
 outfile <- file.path("runtime", "runtime_comparaison.csv")
 write.csv(compare, file=outfile, row.names = FALSE)
 
+elapsed_summary <- compare %>%
+  select(run, step, dataset, elapsed_vtam, elapsed_vtamR ) %>%
+  group_by(step, dataset) %>%
+  summarize(mean_elapsed_time_vtam = round(mean(elapsed_vtam)),
+            mean_elapsed_time_vtamR = round(mean(elapsed_vtamR)),
+            SD_elapsed_time_vtam = round(sd(elapsed_vtam), digits=3),
+            SD_elapsed_time_vtamR = round(sd(elapsed_vtamR), digits=3),
+            .groups = "drop") %>%
+  mutate(speedup = round(mean_elapsed_time_vtam/mean_elapsed_time_vtamR, digits=2)) %>%
+  select(step, dataset, mean_elapsed_time_vtam, mean_elapsed_time_vtamR, speedup, SD_elapsed_time_vtam, SD_elapsed_time_vtamR) %>%
+  arrange(step, dataset)
+  
+outfile <- file.path("runtime", "runtime_comparaison_summary.csv")
+write.csv(elapsed_summary, file=outfile, row.names = FALSE)
 

@@ -278,4 +278,3 @@ Overall, the complete pipeline requires:
 
 Thus, vtamR reduces the overall runtime by approximately **30%**.
 
-I corrected grammar, terminology consistency (`pipeline`, `assignments`, `function` names), and formatting while preserving the RM/Markdown structure and command blocks.
