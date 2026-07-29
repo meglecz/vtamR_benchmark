@@ -15,6 +15,9 @@ outdir_pipe <- as.character(args[11])
 library(vtamR)
 library(dplyr)
 
+search()
+packageVersion("vtamR")
+
 # setwd("~/vtamR_benchmark")
 
 
@@ -181,13 +184,17 @@ start_time <- proc.time()
 outfile <- file.path(outdir, "5_filter_pcr_error.csv")
 by_sample <- TRUE
 sample_prop <- 0.8
+filter_occurrence <- TRUE
+min_read_count <- 10
 
 read_count_df <- filter_pcr_error(
   read_count_df,
   outfile = outfile,
   pcr_error_var_prop = pcr_error_var_prop,
   sample_prop = sample_prop,
-  vsearch_path = vsearch_path
+  vsearch_path = vsearch_path,
+  filter_occurrence = filter_occurrence,
+  min_read_count = min_read_count
 )
 
 param <- paste("pcr_error_var_prop:", pcr_error_var_prop, "by_sample:", by_sample, "sample_prop:", sample_prop, sep=" ")
@@ -204,13 +211,15 @@ outfile <- file.path(outdir, "6_filter_chimera.csv")
 abskew=16
 by_sample = TRUE
 sample_prop <- 0.8
+filter_occurrence <- TRUE
 
 read_count_df <- filter_chimera(
   read_count_df, 
   outfile=outfile,
   by_sample=by_sample, 
   abskew=abskew,
-  vsearch_path = vsearch_path
+  vsearch_path = vsearch_path,
+  filter_occurrence = filter_occurrence
 )
 
 param <- paste("by_sample:", by_sample, "abskew:", abskew, "sample_prop:", sample_prop, sep=" ")

@@ -1,6 +1,6 @@
 # Benchmark vtamR
 Emese Meglécz 
-2026/07/09
+2026/07/29
 
 ## Input
 
@@ -179,85 +179,43 @@ bash ./scripts/vtamR.sh
 
 ### Merge and demultiplex
 
-`compare_read_counts.R`
+`compare_preprocess.R`
 
 Output:
 
-**output_info/read_count_merge_demultiplex.csv**
+**comparaison_results/preprocess/preprocess_read_counts.csv**
 
 The `merge`/`merge_and_trim` and `sortreads`/`demultiplex_and_trim` steps from VTAM and vtamR produce files with the same number of sequences. The only exception is a single read difference:
 
-| filename        | read_count_vtam | read_count_vtamr | dataset   | step             |
-| --------------- | --------------- | ---------------- | --------- | ---------------- |
-| 14Cro13-1.fasta | 41538           | 41539            | fish_mfzr | demultiplex_trim |
+| filename           | read_count_vtam | read_count_vtamr | dataset   | step             |
+| ------------------ | --------------- | ---------------- | --------- | ---------------- |
+| 14Cro13-1.fasta.gz | 41538           | 41539            | fish_mfzr | demultiplex_trim |
 
 ### Filter
-
-**Export VTAM filter tables from `db.sqlite`**
-
-Create tables for each VTAM filtering step:
-
-```bash
-mkdir -p output_info/db_tables
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM Sample;" > output_info/db_tables/samples.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM Run;" > output_info/db_tables/runs.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM VariantReadCount;" > output_info/db_tables/VariantReadCount.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterLFN;" > output_info/db_tables/FilterLFN.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterMinReplicateNumber;" > output_info/db_tables/FilterMinReplicateNumber.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterPCRerror;" > output_info/db_tables/FilterPCRerror.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterChimera;" > output_info/db_tables/FilterChimera.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterMinReplicateNumber2;" > output_info/db_tables/FilterMinReplicateNumber2.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterRenkonen;" > output_info/db_tables/FilterRenkonen.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterMinReplicateNumber3;" > output_info/db_tables/FilterMinReplicateNumber3.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterIndel;" > output_info/db_tables/FilterIndel.csv
-
-sqlite3 -header -csv db.sqlite "SELECT * FROM FilterCodonStop;" > output_info/db_tables/FilterCodonStop.csv
-```
 
 `compare_filter.R`
 
 This script compares the final output files produced by VTAM and vtamR and identifies occurrences that are present in one output but absent from the other.
 
-For each occurrence, the script generates files reporting its presence or absence at each filtering step in which it appears:
+The output (**comparaison_results/filter/filter_read_counts.csv**) lists all occurrences of all datasets for both pipelines.  
 
-* `occurrences_missing_in_vtam_DATASET.csv`
-* `occurrences_missing_in_vtamR_DATASET.csv`
-
-It also generates a file containing read counts from both pipelines for each occurrence detected in the final filtered outputs:
-
-* `read_count_VTAM_vtamR_DATASET.csv`
-
-
-### Conclusions
-
-Only a small number of occurrences differ between the two pipelines. All discrepancies originate from the `filter_chimera` or `filter_pcr_error` steps.
-
-For PCR error and chimera filtering, vtamR removes a variant when it is classified as a PCR error in more than 80% of the samples in which it occurs. In contrast, VTAM processes samples independently and makes filtering decisions on a sample-by-sample basis, without enforcing a consistent decision for a given ASV across all samples.
-
-Therefore, when analyses are performed independently for each sample, obtaining exactly identical results between the two pipelines is not possible. However, the behavior implemented in vtamR is considered more biologically justified, since a given ASV is unlikely to represent an artefact in one sample while corresponding to a true biological variant in another.
+The only difference is in the 14Cro13 sample of the fish_mfzr dataset, whete the read counts differ by one between vtamR and VTAM (7757 in VTAM, 7758 in vtamR). This stems from the only differente at the demultiplexing steps.
 
 ### Taxassign
 
 `compare_taxassign.R`
 
-The proportion of different assignments between VTAM and vtamR is low (2–3%). Almost all assignments that differ between the pipelines occur at ≤80% identity, and are therefore uncertain in any case.
+The proportion of the number of ASV with different taxonomic assignments between VTAM and vtamR is low (1.9–3.3%) as shown in **comparaison_results/taxassign/taxassign_summary.csv**
 
-| dataset   | total_asv | different | prop               |
-| --------- | --------- | --------- | ------------------ |
-| fish_mfzr | 153       | 5         | 0.0326797385620915 |
-| fish_zfzr | 105       | 2         | 0.019047619047619  |
-| bat       | 1676      | 41        | 0.0244630071599045 |
+| dataset   | number_of_asv | number_of_differences | proportion |
+| --------- | ------------- | --------------------- | ---------- |
+| fish_mfzr | 153           | 5                     | 0.033      |
+| fish_zfzr | 105           | 2                     | 0.019      |
+| bat       | 1676          | 38                    | 0.023      |
+
+**comparaison_results/taxassign/taxassign_differences.csv**: 
+
+Most of these assignments occur at ≤80% identity, and are therefore uncertain in any case. In most cases, the ASV is unassigned by vtamR (32/45) or VTAM (2/45). When they are assigned by both pipelines, in 9 or 11 cases, the assignment differs only by the resolution. 
 
 ### Pool markers
 
@@ -265,16 +223,18 @@ The proportion of different assignments between VTAM and vtamR is low (2–3%). 
 
 The VTAM `pool` function and the vtamR `pool_markers` function produce identical results.
 
+**comparaison_results/pool_markers/pool_markers_read_counts.csv**
+
 ### Runtime
 
 `compare_runtime.R`
 
 For almost all steps and datasets, vtamR is faster than VTAM, both in terms of elapsed time and total CPU time.
 
-Overall, the complete pipeline requires:
+Overall, the complete pipeline for 4 datasest requires:
 
-* **4484.65 seconds** for vtamR
-* **6510.25 seconds** for VTAM
+* **4481 seconds** for vtamR (mean over 10 runs)
+* **6421 seconds** for VTAM (mean over 10 runs)
 
 Thus, vtamR reduces the overall runtime by approximately **30%**.
 

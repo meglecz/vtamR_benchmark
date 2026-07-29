@@ -88,11 +88,15 @@ read_count_df_sample <- filter_occurrence_sample(
 # filter_pcr_error
 by_sample <- TRUE
 sample_prop <- 0.8
+filter_occurrence <- TRUE
+min_read_count <- 10
 read_count_df_pcr <- filter_pcr_error(
   read_count_raw,
   pcr_error_var_prop = pcr_error_var_prop,
   sample_prop = sample_prop,
-  vsearch_path = vsearch_path
+  vsearch_path = vsearch_path,
+  filter_occurrence = filter_occurrence,
+  min_read_count = min_read_count
 )
 # pool_filters
 read_count_df_tmp <- pool_filters(

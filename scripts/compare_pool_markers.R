@@ -26,10 +26,16 @@ vtam_pooled <- vtam_pooled %>%
 
 #### Compare results of pool_markers (vtamR) and pool (VTAM) #### 
 comparaison <- full_join(vtam_pooled, vtamr_pooled, by=c("asv_id", "asv", "sample"), suffix = c("_vtam", "_vtamR")) %>%
-  mutate(diff_read_count = read_count_vtam - read_count_vtamR)
+  mutate(diff_read_count = read_count_vtam - read_count_vtamR) %>%
+  select(asv_id, pooled_variants, sample, read_count_vtam, read_count_vtamR, diff_read_count, asv)
 
 outdir <- file.path("comparaison_results", "pool_markers")
 outdir <- check_dir(outdir)
-outfile <- file.path(outdir, "VTAM_vtamR_pooled_read_counts.csv" )
+outfile <- file.path(outdir, "pool_markers_read_counts.csv" )
 write.csv(comparaison, file=outfile, row.names = FALSE)
+
+diff <- comparaison %>%
+  filter(diff_read_count != 0)
+print("Occurrences with different read counts:")
+print(diff)
 

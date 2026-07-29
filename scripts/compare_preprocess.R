@@ -64,13 +64,13 @@ return(rc)
 ######################################################################
 
 datasets = c("fish_mfzr", "fish_zfzr", "shark") # bat were preprocessed only by vtamR
-# count the number of sequences in each merged fasta file
+# count the number of sequences in each merged fasta file (VTAM and vtamR)
 merge_rc <- compare_rc(step="merge", datasets, "pipeline_output_1")
 demultiplex_rc <- compare_rc(step="demultiplex_trim", datasets, "pipeline_output_1")
 
 rc <- rbind(merge_rc, demultiplex_rc)
 outdir <- file.path("comparaison_results", "preprocess")
 outdir <- check_dir(outdir)
-write.csv(rc, file = file.path(outdir, "read_count_merge_demultiplex.csv"), row.names = FALSE)
+write.csv(rc, file = file.path(outdir, "preprocess_read_counts.csv"), row.names = FALSE)
 
 
