@@ -102,13 +102,15 @@ Run the VTAM pipeline with the following steps:
   - skip for **shark**
 - pool the **fish_mfzr** and **fish_zfzr** results
 
-The following script runs the complete VTAM pipeline **10 times** for all four datasets (**bat**, **fish_mfzr**, **fish_zfzr**, and **shark**) and pools the fish primer-pair results.
+The following script runs the complete VTAM pipeline **5 times** for all four datasets (**bat**, **fish_mfzr**, **fish_zfzr**, and **shark**) and pools the fish primer-pair results and register runtimes.
 
 ```
 bash ./scripts/vtam.sh
 ```
 
 ## vtamR
+
+Before running the `vtamR` analysis, the complete list of ASVs from all datasets is extracted from `db.sqlite` (step included in `vtamR.sh`). This CSV file is then used to assign `ASV_ID`s in the vtamR analysis, ensuring consistency between the `asv_id `and ASV sequences across the two analyses.
 
 Run the following vtamR functions in an order that matches the VTAM pipeline as closely as possible.
 
@@ -143,30 +145,44 @@ Run the following vtamR functions in an order that matches the VTAM pipeline as 
 
 ### Parameter suggestion
 
+The VTAM `optimize` function can be run independently to identify optimal values for the `lfn_sample_replicate_cutoff` and `pcr_error_var_prop` parameters. To determine the best combination of `lfn_variant_cutoff` and `lfn_read_count_cutoff`, the `optimize` function evaluates a series of combinations of these two parameters. For each combination, `filter_lfn_sample_replicate` and `filter_pcr_error` are also applied, and the numbers of true positives (TPs) and false positives (FPs) are calculated.
+
+In VTAM, all of these filtering steps are applied to the **original, unfiltered dataset** for each parameter combination. This is inefficient because the same filtering steps have to be repeatedly recalculated.
+
+In `vtamR`, the approach is more straightforward. The three `suggest_xxx ` functions are run sequentially, and the best parameter value identified at each step is used directly for filtering. The resulting filtered dataset is then passed to the next filter–suggestion pair. This avoids repeatedly applying the same filtering steps to the original dataset.
+
+For these analyses, the aim was to benchmark `vtamR` against `VTAM`. Therefore, to ensure that the two approaches were directly comparable:
+
+- All `optimize`/`suggest` steps were run on the **unfiltered dataset**, following the VTAM approach.
+- The known occurrences (TP, FP, and FN) from the control samples were calculated based on the **prefiltered data**.
+- The `filter_lfn_sample_replicate` and `filter_pcr_error` steps were deactivated in VTAM when searching for `lfn_variant_cutoff` and `lfn_read_count_cutoff `.
+
+### vtamR suggest_xxx function
+
+
+
 - `suggest_sample_cutoff`
   - on unfiltered data
   - corresponds to VTAM optimization up to `OptimizeLFNsampleReplicate`
 - `suggest_pcr_error_cutoff`
   - on unfiltered data
   - corresponds to VTAM optimization up to `OptimizePCRerror`
-- pre-filter using the optimized values
-  - `filter_occurrence_sample`
-  - `filter_pcr_error`
-  - `pool_filters`
-  - `filter_min_replicate`
 - `classify_control_occurrences`
   - on pre-filtered data
   - corresponds to VTAM `make_known_occurrences`
 - `suggest_variant_readcount_cutoffs`
-  - on pre-filtered data
+  - on unfiltered data
   - corresponds to VTAM optimization up to `OptimizeLFNreadCountAndLFNvariant`
 
 ### Taxonomic assignment
 
 - `assign_taxonomy_rdp` for **shark**
+
 - `assign_taxonomy_ltg` for all other datasets (VTAM: `taxassign`)
 
-The following script runs the complete vtamR pipeline **10 times** for all four datasets (**bat**, **fish_mfzr**, **fish_zfzr**, and **shark**) and pools the fish primer-pair results.
+
+
+The following script runs the complete vtamR pipeline **5 times** for all four datasets (**bat**, **fish_mfzr**, **fish_zfzr**, and **shark**) and pools the fish primer-pair results and register runtimes.
 
 The complete list of ASVs (`variant`) and ASV identifiers (`asv_id`) extracted from the VTAM database is used to ensure **consistent ASV IDs across both pipelines**.
 
@@ -216,6 +232,31 @@ The proportion of the number of ASV with different taxonomic assignments between
 **comparaison_results/taxassign/taxassign_differences.csv**: 
 
 Most of these assignments occur at ≤80% identity, and are therefore uncertain in any case. In most cases, the ASV is unassigned by vtamR (32/45) or VTAM (2/45). When they are assigned by both pipelines, in 9 or 11 cases, the assignment differs only by the resolution. 
+
+### Optimize/suggest
+`compare_suggest.R`
+
+#### `classify_control_occurrences` (vtamR) vs.  `make_known_occurrences` (VTAM)
+Identical results
+**comparaison_results/optimize_suggest/known_occurrences.csv**
+
+#### `suggest_sample_cutoff`   (vtamR) vs. `OptimizeLFNsampleReplicate` (VTAM)
+Identical results
+**comparaison_results/optimize_suggest/sample_replicate_cutoffs.csv**
+
+#### `suggest_pcr_error_cutoff` (vtamR) vs. `OptimizePCRerror` (VTAM)
+Minor differences:
+**comparaison_results/optimize_suggest/pcr_error_cutoffs.csv**
+
+- In vtamR, samples occurrences with fewer than 10 reads are ignored to avoid estimating the error proportion from low read counts, which are more susceptible to random fluctuations and would likely be removed by other filters anyway. This improves robustness and reduces runtime.
+- vtamR identifies ASV pairs as PCR errors when they differ by one nucleotide in length while being otherwise identical. VTAM does not apply this criterion.
+
+#### `suggest_variant_readcount_cutoffs`   (vtamR) vs. `OptimizeLFNreadCountAndLFNvariant` (VTAM)
+Minor differences:
+**comparaison_results/optimize_suggest/lfn_read_count_and_lfn_variant_cutoffs.csv**
+
+`variant_cutoff`s  in VTAM are determined by generating 10 values between the minimum and maximum. This can lead to rounding of the cutoff values, which may not exactly match the cutoffs used in vtamR, where values are determined based the minimum, maximum, and increment.
+This can lead to slight differences in the number of false positives and true positives.
 
 ### Pool markers
 

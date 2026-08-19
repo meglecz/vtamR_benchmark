@@ -11,15 +11,15 @@ library(dplyr)
 # setwd("~/vtamR_benchmark")
 
 # use VTAM output to be able to compare runtimes (same input for VTAM and vtamR taxassing)
-asv <- file.path(outdir_pipe, dataset, "VTAM", "filter_default", "asvtable_default.tsv")
+asv <- file.path(outdir_pipe, dataset, "vtamR", "filter_default", "12_pool_replicates.csv")
 outfile <- file.path(outdir_pipe, dataset, "vtamR", "taxassign", "asv_default_taxa.csv")
+log_file <- file.path(outdir_pipe, dataset, "vtamR", "vtamR_log.csv")
+package_versions <- file.path(outdir_pipe, dataset, "vtamR", "R_package_versions.csv")
 
 # select only sequences are sequence ids and rename them to be compatible with vtamR
-asv_df <- read.table(asv, header = TRUE, sep="\t") %>%
-  select(
-    asv_id = variant,
-    asv = sequence
-  )
+asv_df <- read.table(asv, header = TRUE, sep=",") %>%
+  select(asv_id, asv) %>%
+  distinct()
 
 #parametres that match as much as possible VTAM taxassign
 ltg_params_df = data.frame( pid=c(100,99,97,95,90,85,80,75),
@@ -37,7 +37,8 @@ if(dataset == "shark"){ # use rdp classifier for 16S
     max_memory = 8,
     confidence = 0.8,
     rm_chloroplast = TRUE,
-    outfile = outfile
+    outfile = outfile,
+    log_file = log_file
   )
 }else{
   asv_tax <- assign_taxonomy_ltg(
@@ -46,6 +47,10 @@ if(dataset == "shark"){ # use rdp classifier for 16S
     blast_db=blast_db, 
     blast_path=blast_path,
     outfile=outfile,
-    ltg_params = ltg_params_df
+    ltg_params = ltg_params_df,
+    log_file = log_file
     )
 }
+
+# write R package versions to file
+collect_package_info(package_versions)

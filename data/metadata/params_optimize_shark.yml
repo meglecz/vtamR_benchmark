@@ -1,4 +1,4 @@
-pcr_error_var_prop: 0.20
-lfn_sample_replicate_cutoff: 0.001
+lfn_sample_replicate_cutoff: 0.000
+pcr_error_var_prop: 0.0
 skip_filter_codon_stop: 1
 skip_filter_indel: 1

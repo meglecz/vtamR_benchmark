@@ -11,8 +11,9 @@ blast_db="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5/COInr_for_vtam"
 taxonomy="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5/COInr_for_vtam_taxonomy.tsv"
 
 datasets=("bat" "fish_mfzr" "fish_zfzr" "shark")
+#datasets=("fish_mfzr" )
 
-for i in {1..10}; do
+for i in {1..5}; do
     echo "Iteration $i"
     
     outdir="pipeline_output_$i"
@@ -108,30 +109,18 @@ for i in {1..10}; do
 
     
         if [[ "$ds" == "bat" ]]; then
-    
-        pcr_error_var_prop="0.2"
-        sample_cutoff="0.002"
-        by_replicate="FALSE"
-    
+            by_replicate="FALSE" 
         elif [[ "$ds" == "shark" ]]; then
-    
-        pcr_error_var_prop="0.2"
-        sample_cutoff="0.001"
-        by_replicate="TRUE"
-    
+            by_replicate="TRUE"
         else
-    
-        pcr_error_var_prop="0.1"
-        sample_cutoff="0.003"
-        by_replicate="TRUE"
-    
+            by_replicate="TRUE"
         fi
 
         /usr/bin/time -f \
         "vtamR, $i, suggest_parameters, ${ds}, %E, %U, %S" \
         -a -o runtime/time_vtamR.csv \
         Rscript scripts/vtamR_suggest_parameters.R \
-            ${ds} $vsearch_path $pcr_error_var_prop $sample_cutoff $by_replicate $outdir\
+            ${ds} $vsearch_path $by_replicate $outdir\
         > /dev/null
 
     #################################################

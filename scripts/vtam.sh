@@ -9,8 +9,9 @@ db_dir="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5"
 taxonomy="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5/COInr_for_vtam_taxonomy.tsv"
 
 datasets=("bat" "fish_mfzr" "fish_zfzr" "shark")
+#datasets=("fish_mfzr" )
 
-for i in {9..10}; do
+for i in {1..10}; do
     echo "Iteration $i"
 
     outdir="pipeline_output_$i"

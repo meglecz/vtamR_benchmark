@@ -25,6 +25,7 @@ asv_list = file.path(outdir_pipe, "asv_all_datasets.csv")
 asv_list_df = read.csv(asv_list)
 colnames(asv_list_df) <- c("asv_id", "asv")
 
+log_file <- file.path(outdir_pipe, dataset, "vtamR", "vtamR_log.csv")
 outdir = file.path(outdir_pipe, dataset, "vtamR", filterdir)
 mock_composition <- paste("vtamR_mock_composition_", dataset, ".csv", sep="")
 mock_composition <- file.path("data", "metadata", mock_composition)
@@ -64,7 +65,8 @@ read_count_df <- dereplicate(
   sampleinfo = sampleinfo, 
   outfile=outfile,
   dir=demultiplexed_dir,
-  input_asv_list = asv_list_df
+  input_asv_list = asv_list_df,
+  log_file = log_file
   # output_asv_list=updated_asv_list
 )
 stat_df <- get_stat(read_count_df, stat_df=stat_df, stage="input", params=NA)
@@ -80,7 +82,8 @@ outfile <- file.path(outdir, "2_LFNglobalReadCount.csv")
 read_count_df <- filter_asv_global(
   read_count_df, 
   outfile=outfile,
-  cutoff=global_read_count_cutoff
+  cutoff=global_read_count_cutoff,
+  log_file = log_file
 )
 param <- paste("global_read_count_cutoff:", global_read_count_cutoff, sep=" ")
 stat_df <- get_stat(read_count_df, stat_df, stage="filter_asv_global", params=param)
@@ -97,7 +100,8 @@ outfile <- file.path(outdir, "3-1_filter_occurrence_sample.csv")
 read_count_df_sample <- filter_occurrence_sample(
   read_count_df, 
   cutoff=sample_cutoff, 
-  outfile=outfile
+  outfile=outfile,
+  log_file = log_file
 )
 
 param <- paste("cutoff:", sample_cutoff, sep=" ")
@@ -114,7 +118,8 @@ read_count_df_variant <- filter_occurrence_variant(
   read_count_df, 
   cutoff=variant_cutoff, 
   outfile=outfile,
-  by_replicate = by_replicate
+  by_replicate = by_replicate,
+  log_file = log_file
 )
 
 param <- paste("cutoff:", variant_cutoff, "by_replicate:", by_replicate, sep=" ")         
@@ -130,7 +135,8 @@ outfile <- file.path(outdir, "3-3_filter_occurrence_read_count.csv")
 read_count_df_rc <- filter_occurrence_read_count(
   read_count_df, 
   cutoff=read_count_cutoff, 
-  outfile=outfile
+  outfile=outfile,
+  log_file = log_file
 )
 
 param <- paste("cutoff:", read_count_cutoff, sep=" ")        
@@ -146,7 +152,8 @@ outfile <- file.path(outdir, "3-4_pool_lfn_filters.csv")
 
 read_count_df <- pool_filters(
   read_count_df_rc, read_count_df_variant, read_count_df_sample,
-  outfile=outfile
+  outfile=outfile,
+  log_file = log_file
 )
 
 stat_df <- get_stat(read_count_df, stat_df, stage="pool_filters", params=NA)
@@ -168,7 +175,8 @@ outfile <- file.path(outdir, "4_filter_min_replicate_1.csv")
 read_count_df <- filter_min_replicate(
   read_count_df, 
   cutoff=min_replicate_number, 
-  outfile=outfile
+  outfile=outfile,
+  log_file = log_file
 )
 
 param <- paste("cutoff:", min_replicate_number, sep=" ")  
@@ -194,7 +202,8 @@ read_count_df <- filter_pcr_error(
   sample_prop = sample_prop,
   vsearch_path = vsearch_path,
   filter_occurrence = filter_occurrence,
-  min_read_count = min_read_count
+  min_read_count = min_read_count,
+  log_file = log_file
 )
 
 param <- paste("pcr_error_var_prop:", pcr_error_var_prop, "by_sample:", by_sample, "sample_prop:", sample_prop, sep=" ")
@@ -219,7 +228,8 @@ read_count_df <- filter_chimera(
   by_sample=by_sample, 
   abskew=abskew,
   vsearch_path = vsearch_path,
-  filter_occurrence = filter_occurrence
+  filter_occurrence = filter_occurrence,
+  log_file = log_file
 )
 
 param <- paste("by_sample:", by_sample, "abskew:", abskew, "sample_prop:", sample_prop, sep=" ")
@@ -239,7 +249,8 @@ outfile <- file.path(outdir, "7_filter_min_replicate_2.csv")
 read_count_df <- filter_min_replicate(
   read_count_df, 
   cutoff=min_replicate_number, 
-  outfile=outfile
+  outfile=outfile,
+  log_file = log_file
 )
 
 param <- paste("cutoff:", min_replicate_number, sep=" ")  
@@ -258,7 +269,8 @@ renkonen_distance_quantile <- 0.9
 read_count_df <- filter_replicate(
   read_count_df, 
   renkonen_distance_quantile = renkonen_distance_quantile,
-  outfile = outfile
+  outfile = outfile,
+  log_file = log_file
 )
 
 param <- paste("renkonen_distance_quantile:", renkonen_distance_quantile, sep=" ")
@@ -278,7 +290,8 @@ outfile <- file.path(outdir, "9_filter_min_replicate_3.csv")
 read_count_df <- filter_min_replicate(
   read_count_df, 
   cutoff=min_replicate_number, 
-  outfile=outfile
+  outfile=outfile,
+  log_file = log_file
 )
 
 param <- paste("cutoff:", min_replicate_number, sep=" ")  
@@ -296,7 +309,8 @@ if(coding){
   
   read_count_df <- filter_indel(
     read_count_df,
-    outfile=outfile
+    outfile=outfile,
+    log_file = log_file
   )
   
   stat_df <- get_stat(read_count_df, stat_df, stage="filter_indel", params=NA)
@@ -316,7 +330,8 @@ if(coding){
   read_count_df <- filter_stop_codon(
     read_count_df, 
     genetic_code=genetic_code,
-    outfile=outfile
+    outfile=outfile,
+    log_file = log_file
   )
   
   param <- paste("genetic_code:", genetic_code, sep=" ")
@@ -337,7 +352,8 @@ method = "sum"
 read_count_sample_df <- pool_replicates(
   read_count_df,
   method = method,
-  outfile = outfile
+  outfile = outfile,
+  log_file = log_file
 )
 
 param <- paste("method:", method, sep=" ")
@@ -360,7 +376,8 @@ asv_table_df <- write_asv_table(read_count_sample_df,
                                 add_sums_by_sample=TRUE, 
                                 add_sums_by_asv=TRUE, 
                                 add_expected_asv=TRUE, 
-                                mock_composition=mock_composition)
+                                mock_composition=mock_composition,
+                                log_file = log_file)
 
 end_time <- proc.time()
 timing <- end_time - start_time
@@ -377,7 +394,8 @@ results <- classify_control_occurrences(read_count_sample_df,
                                         mock_composition=mock_composition, 
                                         known_occurrences=known_occurrences, 
                                         false_negatives=false_negatives,
-                                        performance_metrics=performance_metrics)
+                                        performance_metrics=performance_metrics,
+                                        log_file = log_file)
 
 # give explicit names to the 3 output data frames
 known_occurrences_df <- results[[1]]
@@ -398,5 +416,6 @@ write.csv(stat_df, file=stat_file, row.names = TRUE)
 
 runtime_file = file.path(outdir, "performance", "runtimes.csv")
 write.csv(run_time, file=runtime_file, row.names = FALSE)
+
 
 

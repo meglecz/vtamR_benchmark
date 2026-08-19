@@ -19,7 +19,7 @@ to_seconds <- function(x) {
 vtam <- vtam %>%
   mutate(elapsed = to_seconds(elapsed)) %>%
   mutate(total_cpu = user + system) %>%
-  mutate(average_cpu = total_cpu / elapsed)
+  mutate(average_cpu = total_cpu / elapsed) 
 
 vtamr <- vtamr %>%
   mutate(elapsed = to_seconds(elapsed)) %>%

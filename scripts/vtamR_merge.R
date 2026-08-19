@@ -16,6 +16,7 @@ if(dataset == "bat"){
   outdir = file.path(outdir, dataset, "vtamR", "merge")
 }
 fastq_dir <- file.path("data", "fastq", dataset)
+log_file <- file.path(outdir, dataset, "vtamR", "vtamR_log.csv")
 
 fastainfo_df <- merge_fastq_pairs(
   fastqinfo, 
@@ -29,6 +30,7 @@ fastainfo_df <- merge_fastq_pairs(
   vsearch_path = vsearch_path,
   compress=TRUE,
   compress_method="pigz",
-  pigz_path=pigz_path
+  pigz_path=pigz_path,
+  log_file = log_file
 )
 
