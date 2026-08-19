@@ -157,7 +157,7 @@ For these analyses, the aim was to benchmark `vtamR` against `VTAM`. Therefore, 
 - The known occurrences (TP, FP, and FN) from the control samples were calculated based on the **prefiltered data**.
 - The `filter_lfn_sample_replicate` and `filter_pcr_error` steps were deactivated in VTAM when searching for `lfn_variant_cutoff` and `lfn_read_count_cutoff `.
 
-### vtamR suggest_xxx function
+### vtamR `suggest_xxx` functions
 
 
 
@@ -274,8 +274,8 @@ For almost all steps and datasets, vtamR is faster than VTAM, both in terms of e
 
 Overall, the complete pipeline for 4 datasest requires:
 
-* **4481 seconds** for vtamR (mean over 10 runs)
-* **6421 seconds** for VTAM (mean over 10 runs)
+* **4175 seconds** for vtamR (mean over 5 runs)
+* **6366 seconds** for VTAM (mean over 5 runs)
 
-Thus, vtamR reduces the overall runtime by approximately **30%**.
+Thus, vtamR reduces the overall runtime by approximately **35%**.
 
