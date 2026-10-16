@@ -2,11 +2,12 @@ args <- commandArgs(trailingOnly = TRUE)
 dataset <- as.character(args[1])
 vsearch_path <- as.character(args[2])
 pigz_path <- as.character(args[3])
-outdir <-  as.character(args[4])
+log_file <-  as.character(args[4])
+outdir <-  as.character(args[5])
 
 library(vtamR)
 
-# setwd("~/vtamR_benchmark")
+
 
 fastqinfo <- paste0("vtamR_fastqinfo_", dataset, ".csv")
 fastqinfo <- file.path("data", "metadata", fastqinfo)
@@ -16,7 +17,6 @@ if(dataset == "bat"){
   outdir = file.path(outdir, dataset, "vtamR", "merge")
 }
 fastq_dir <- file.path("data", "fastq", dataset)
-log_file <- file.path(outdir, dataset, "vtamR", "vtamR_log.csv")
 
 fastainfo_df <- merge_fastq_pairs(
   fastqinfo, 

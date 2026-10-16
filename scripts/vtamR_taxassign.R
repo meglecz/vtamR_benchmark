@@ -4,6 +4,7 @@ blast_path <- as.character(args[2])
 taxonomy <- as.character(args[3])
 blast_db <- as.character(args[4])
 outdir_pipe <- as.character(args[5])
+log_file <- as.character(args[6])
 
 library(vtamR)
 library(dplyr)
@@ -13,7 +14,6 @@ library(dplyr)
 # use VTAM output to be able to compare runtimes (same input for VTAM and vtamR taxassing)
 asv <- file.path(outdir_pipe, dataset, "vtamR", "filter_default", "12_pool_replicates.csv")
 outfile <- file.path(outdir_pipe, dataset, "vtamR", "taxassign", "asv_default_taxa.csv")
-log_file <- file.path(outdir_pipe, dataset, "vtamR", "vtamR_log.csv")
 package_versions <- file.path(outdir_pipe, dataset, "vtamR", "R_package_versions.csv")
 
 # select only sequences are sequence ids and rename them to be compatible with vtamR

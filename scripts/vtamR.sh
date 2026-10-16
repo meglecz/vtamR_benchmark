@@ -10,13 +10,16 @@ blast_path="$HOME/miniconda3/envs/vtam/bin/blastn"
 blast_db="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5/COInr_for_vtam"
 taxonomy="$HOME/mkCOInr/COInr/COInr_for_vtam_2026_05_03_dbV5/COInr_for_vtam_taxonomy.tsv"
 
+
 datasets=("bat" "fish_mfzr" "fish_zfzr" "shark")
 #datasets=("fish_mfzr" )
 
-for i in {1..5}; do
+for i in {2..5}; do
     echo "Iteration $i"
     
     outdir="pipeline_output_$i"
+    log="vtamR_log.csv"
+    log_file="$outdir/$log"
     
 #################################################
 # STEP Extract complete list of asv asv_id from VTAM database
@@ -41,7 +44,7 @@ for i in {1..5}; do
            "vtamR, $i, merge, ${ds}, %E, %U, %S" \
             -a -o runtime/time_vtamR.csv \
             Rscript scripts/vtamR_merge.R \
-            ${ds} $vsearch_path $pigz_path $outdir\
+            ${ds} $vsearch_path $pigz_path $log_file $outdir \
             > /dev/null
         
         else
@@ -60,7 +63,7 @@ for i in {1..5}; do
             "vtamR, $i, demultiplex_trim, ${ds}, %E, %U, %S" \
             -a -o runtime/time_vtamR.csv \
             Rscript scripts/vtamR_demultiplex.R \
-                ${ds} $vsearch_path $cutadapt_path $pigz_path $outdir\
+                ${ds} $vsearch_path $cutadapt_path $pigz_path $outdir $log_file\
             > /dev/null
         
         else
@@ -99,7 +102,7 @@ for i in {1..5}; do
         "vtamR, $i, filter_default, ${ds}, %E, %U, %S" \
         -a -o runtime/time_vtamR.csv \
         Rscript scripts/vtamR_filter.R \
-            ${ds} filter_default $vsearch_path $cutadapt_path $pcr_error_var_prop $sample_cutoff $read_count_cutoff $variant_cutoff $by_replicate $coding $outdir\
+            ${ds} filter_default $vsearch_path $cutadapt_path $pcr_error_var_prop $sample_cutoff $read_count_cutoff $variant_cutoff $by_replicate $coding $outdir $log_file\
         > /dev/null
 
     
@@ -120,7 +123,7 @@ for i in {1..5}; do
         "vtamR, $i, suggest_parameters, ${ds}, %E, %U, %S" \
         -a -o runtime/time_vtamR.csv \
         Rscript scripts/vtamR_suggest_parameters.R \
-            ${ds} $vsearch_path $by_replicate $outdir\
+            ${ds} $vsearch_path $by_replicate $outdir $log_file\
         > /dev/null
 
     #################################################
@@ -131,7 +134,7 @@ for i in {1..5}; do
         "vtamR, $i, taxassign, ${ds}, %E, %U, %S" \
         -a -o runtime/time_vtamR.csv \
         Rscript scripts/vtamR_taxassign.R \
-            ${ds} $blast_path $taxonomy $blast_db $outdir\
+            ${ds} $blast_path $taxonomy $blast_db $outdir $log_file\
         > /dev/null
 
     done
@@ -146,7 +149,7 @@ for i in {1..5}; do
     "vtamR, $i, pool_markers, fish, %E, %U, %S" \
     -a -o runtime/time_vtamR.csv \
     Rscript scripts/vtamR_pool_markers.R \
-        $vsearch_path $outdir \
+        $vsearch_path $outdir $log_file\
     > /dev/null
     
 done

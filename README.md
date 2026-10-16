@@ -1,6 +1,6 @@
 # Benchmark vtamR
 Emese Meglécz 
-2026/07/29
+2026/10/15
 
 ## Input
 
@@ -274,8 +274,10 @@ For almost all steps and datasets, vtamR is faster than VTAM, both in terms of e
 
 Overall, the complete pipeline for 4 datasest requires:
 
-* **4175 seconds** for vtamR (mean over 5 runs)
-* **6366 seconds** for VTAM (mean over 5 runs)
+**Mean over 5 runs**
 
-Thus, vtamR reduces the overall runtime by approximately **35%**.
+- 6366 VTAM
+- 3824 vtamR
+
+Thus, vtamR reduces the overall runtime by approximately **40%**.
 

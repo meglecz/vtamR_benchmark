@@ -11,6 +11,7 @@ dir = "pipeline_output_1"
 suggest_dir <- "optimize_suggest"
 outdir <- file.path("comparaison_results", suggest_dir)
 outdir <- check_dir(path=outdir, is_file=FALSE)
+asv_all <- file.path(dir, "asv_all_datasets.csv")
 
 ########### known_occurrences
 known_occ <- data.frame(
@@ -177,6 +178,41 @@ write.csv(pcr_error, file = file.path(outdir, "pcr_error_cutoffs.csv"), row.name
 # This improves robustness and reduces runtime.
 ### vtamR identifies ASV pairs as PCR errors when they differ by one nucleotide 
 # in length while being otherwise identical. VTAM does not apply this criterion.
+
+# extract discordant results between vtam and vtamR, where unexpected_read_count >= 10
+df <- pcr_error %>%
+  filter((is.na(vtamR) & !is.na(vtam)) | (!is.na(vtamR) & is.na(vtam))) %>%
+  filter(unexpected_read_count >= 10) %>%
+  select(expected_asv_id, unexpected_asv_id) %>%
+  distinct()
+
+# add sequence
+asv_all_df <- read.csv(asv_all)
+df <- left_join(df, asv_all_df, by=c("expected_asv_id" = "id")) %>%
+  rename(expected_asv = sequence) %>%
+  left_join(asv_all_df, by=c("unexpected_asv_id" = "id")) %>%
+  rename(unexpected_asv = sequence)
+
+# write files with sequence pairs and align them
+aligned_dir <- file.path(outdir, "alignments")
+for(i in 1:nrow(df)){
+  outfile <- paste(df[i, "expected_asv_id"], df[i, "unexpected_asv_id"], sep="-")
+  outfile <- file.path(aligned_dir, outfile)
+  
+  con <- file(outfile, "wt")
+  txt <- paste0(">", df[i, "expected_asv_id"], "\n", df[i, "expected_asv"], "\n", ">", df[i, "unexpected_asv_id"], "\n", df[i, "unexpected_asv"], "\n")
+  writeLines(txt, con)
+  close(con)
+  
+  aligned <- paste0(outfile, "_aligned.fas")
+  cmd <- paste0("muscle -in ", outfile," -out ", aligned)
+  system(cmd)
+}
+
+count <- pcr_error %>%
+  group_by(vtam, vtamR) %>%
+  summarise(Nb_occurrences = n())
+  
 
 
 ################## optimize_lfn_read_count_and_lfn_variant

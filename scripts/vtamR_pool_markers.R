@@ -1,6 +1,7 @@
 args <- commandArgs(trailingOnly = TRUE)
 vsearch_path <- as.character(args[1])
 outdir_pipe <- as.character(args[2])
+log_file <- as.character(args[3])
 
 library(vtamR)
 library(dplyr)
@@ -18,8 +19,6 @@ mfzr_filtered_vtam_file <- file.path(outdir_pipe, "fish_mfzr/vtamR/filter_defaul
 #mfzr_filtered_vtam <- read.table(mfzr_filtered_vtam_file, header = TRUE, sep=",")
 zfzr_filtered_vtam_file <- file.path(outdir_pipe, "fish_zfzr/vtamR/filter_default/12_pool_replicates.csv")
 #zfzr_filtered_vtam <- read.table(zfzr_filtered_vtam_file, header = TRUE, sep=",")
-
-log_file <-  file.path(outdir_pipe, "fish_pooled_markers", "vtamR", "vtamR_log_pooled_markers.csv") 
 
 
 

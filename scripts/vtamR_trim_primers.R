@@ -3,6 +3,7 @@ dataset <- as.character(args[1])
 vsearch_path <- as.character(args[2])
 cutadapt_path <- as.character(args[3])
 pigz_path <- as.character(args[4])
+log_file <- as.character(args[5])
 
 library(vtamR)
 library(dplyr)
@@ -25,7 +26,8 @@ sampleinfo_df <- trim_primers(
   compress=TRUE,
   compress_method="pigz",
   pigz_path=pigz_path,
-  quiet = TRUE
+  quiet = TRUE,
+  log_file = log_file
 )
 
 

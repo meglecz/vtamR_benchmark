@@ -1,3 +1,6 @@
+args <- commandArgs(trailingOnly = TRUE)
+log_file <- as.character(args[1])
+
 library(vtamR)
 
 setwd("~/vtamR_benchmark")
@@ -9,5 +12,6 @@ outdir <- "data/fastq/shark"
 concatenate_files(
   dirs=fastq_dirs, 
   outdir=outdir, 
-  pattern = "\\.fastq\\.gz"
+  pattern = "\\.fastq\\.gz",
+  log_file = log_file
   )

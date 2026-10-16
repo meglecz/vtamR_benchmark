@@ -64,8 +64,8 @@ elapsed_summary <- compare %>%
   group_by(step, dataset) %>%
   summarize(mean_elapsed_time_vtam = round(mean(elapsed_vtam)),
             mean_elapsed_time_vtamR = round(mean(elapsed_vtamR)),
-            SD_elapsed_time_vtam = round(sd(elapsed_vtam), digits=3),
-            SD_elapsed_time_vtamR = round(sd(elapsed_vtamR), digits=3),
+            SD_elapsed_time_vtam = round(sd(elapsed_vtam), digits=2),
+            SD_elapsed_time_vtamR = round(sd(elapsed_vtamR), digits=2),
             .groups = "drop") %>%
   mutate(speedup = round(mean_elapsed_time_vtam/mean_elapsed_time_vtamR, digits=2)) %>%
   select(step, dataset, mean_elapsed_time_vtam, mean_elapsed_time_vtamR, speedup, SD_elapsed_time_vtam, SD_elapsed_time_vtamR) %>%

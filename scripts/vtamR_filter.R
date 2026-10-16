@@ -11,6 +11,7 @@ variant_cutoff <- as.numeric(args[8]) # 0.001
 by_replicate <- as.logical(args[9]) # TRUE
 coding <- as.logical(args[10]) # TRUE
 outdir_pipe <- as.character(args[11])
+log_file <-  as.character(args[12])
 
 library(vtamR)
 library(dplyr)
@@ -25,7 +26,6 @@ asv_list = file.path(outdir_pipe, "asv_all_datasets.csv")
 asv_list_df = read.csv(asv_list)
 colnames(asv_list_df) <- c("asv_id", "asv")
 
-log_file <- file.path(outdir_pipe, dataset, "vtamR", "vtamR_log.csv")
 outdir = file.path(outdir_pipe, dataset, "vtamR", filterdir)
 mock_composition <- paste("vtamR_mock_composition_", dataset, ".csv", sep="")
 mock_composition <- file.path("data", "metadata", mock_composition)

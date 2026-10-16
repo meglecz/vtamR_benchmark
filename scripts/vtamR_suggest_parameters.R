@@ -4,6 +4,7 @@ dataset <- as.character(args[1])
 vsearch_path  <- as.character(args[2])
 by_replicate <- as.logical(args[3])
 outdir_pipe <- as.character(args[4])
+log_file <- as.character(args[5])
 
 
 library(vtamR)
@@ -14,7 +15,6 @@ library(dplyr)
 outdir = file.path(outdir_pipe, dataset, "vtamR","optimize_suggest")
 mock_composition <- paste("vtamR_mock_composition_", dataset, ".csv", sep="")
 mock_composition <- file.path("data", "metadata", mock_composition)
-log_file <- file.path(outdir_pipe, dataset, "vtamR", "vtamR_log.csv")
 
 if(dataset == "bat"){
   sampleinfo <- file.path("data", "fastq", "bat", "demultiplex_trim", "sampleinfo.csv")

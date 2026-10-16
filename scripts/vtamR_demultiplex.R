@@ -4,6 +4,7 @@ vsearch_path <- as.character(args[2])
 cutadapt_path <- as.character(args[3])
 pigz_path <- as.character(args[4])
 outdir <- as.character(args[5])
+log_file <-  as.character(args[6])
 
 library(vtamR)
 
@@ -12,8 +13,6 @@ library(vtamR)
 fastainfo <- file.path(outdir, dataset, "vtamR", "merge", "fastainfo.csv")
 merged_dir <- file.path(outdir, dataset, "vtamR", "merge")
 demultiplexed_dir <- file.path(outdir, dataset, "vtamR", "demultiplex_trim")
-log_file <- file.path(outdir, dataset, "vtamR", "vtamR_log.csv")
-
 
 sampleinfo_df <- demultiplex_and_trim_fasta(
   fastainfo = fastainfo, 
