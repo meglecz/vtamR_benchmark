@@ -65,6 +65,9 @@ The runtime is recorded (**runtime_concatenate_shark.csv**) but is **not include
 ```
 bash ./scripts/vtamR_concatenate_files.sh
 ```
+### Taxonomic assignment reference database (COInr)
+
+The COInr reference database version 2026-05-03 (10.5281/zenodo.20020232) reformatted for BLAST was downloaded from OSF (https://osf.io/vrfwz)
 
 ### Metadata
 
